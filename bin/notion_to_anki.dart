@@ -23,8 +23,6 @@ void printUsage(ArgParser argParser) {
 }
 
 void main(List<String> arguments) async {
-  Console.init();
-
   final ArgParser argParser = buildParser();
   try {
     final ArgResults results = argParser.parse(arguments);
