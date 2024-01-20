@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:dart_clipboard/dart_clipboard.dart';
 
 import 'replace/replace.dart';
 import 'replace/replace_image_names.dart';
@@ -64,4 +65,7 @@ Future<void> processFile(String filename, List<String> imageNames) async {
   content = findAndReplaceOnString(content, notionFindReplaceDefinitions);
   content = replaceImageNames(content, imageNames);
   await File("$filename-converted.html").writeAsString(content);
+
+  Clipboard.setContents(content);
+  print("Copied contents to clipboard");
 }
