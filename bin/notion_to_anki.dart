@@ -48,13 +48,19 @@ void main(List<String> arguments) async {
       verbose = true;
     }
 
+    final clipboardAvailable = testClipboardAvailability();
+    if (!clipboardAvailable) {
+      print("The clipboard copying function is not available. Please check if "
+          "you have the binary file in the same path as the executable.");
+    }
+
     List<String> imageNames = results['images']?.split(listDivider) ?? [];
     List<String> filenames = results.rest;
 
     for (int i = 0; i < filenames.length; i++) {
-      await processFile(filenames[i], imageNames);
+      await processFile(filenames[i], imageNames, clipboardAvailable);
 
-      if (i < filenames.length - 1 && wait) {
+      if (i < filenames.length - 1 && wait && clipboardAvailable) {
         stdin.readLineSync();
       }
     }
@@ -72,13 +78,24 @@ void main(List<String> arguments) async {
   }
 }
 
-Future<void> processFile(String filename, List<String> imageNames) async {
+Future<void> processFile(String filename, List<String> imageNames, bool copyToClipboard) async {
   var content = await File(filename).readAsString();
   content = findAndReplaceOnString(content, notionFindReplaceDefinitions);
   content = replaceImageNames(content, imageNames);
   final title = extractTitle(content);
   await File("$filename-converted.html").writeAsString(content);
 
-  print("File \"$title\" converted (Copied to clipboard)");
-  // Clipboard.setContents(content);
+  if (copyToClipboard) {
+    Clipboard.setContents(content);
+  }
+  print("File \"$title\" processed${copyToClipboard ? " (Copied to clipboard)" : ""}");
+}
+
+bool testClipboardAvailability() {
+  bool available = false;
+  try {
+    Clipboard.getContents();
+    available = true;
+  } catch (e) {}
+  return available;
 }
