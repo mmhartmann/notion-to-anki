@@ -3,16 +3,21 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:dart_clipboard/dart_clipboard.dart';
 
+import 'find/extract_title.dart';
 import 'replace/replace.dart';
 import 'replace/replace_image_names.dart';
 
 const String version = '0.0.1';
+const String listDivider = ':';
 
 ArgParser buildParser() {
   return ArgParser()
-    ..addOption('file', abbr: 'f', help: 'The file that should be converted.', mandatory: true)
     ..addOption('images',
-        abbr: 'i', help: 'Comma-separated list of filenames of the images that should be replaced')
+        abbr: 'i', help: 'Comma-separated list of filenames of the images that should be replaced.')
+    ..addFlag('wait',
+        abbr: 'w',
+        negatable: false,
+        help: 'Wait after processing each file until you press <ENTER>.')
     ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this usage information.')
     ..addFlag('verbose', abbr: 'v', negatable: false, help: 'Show additional command output.')
     ..addFlag('version', negatable: false, help: 'Print the tool version.');
@@ -28,6 +33,7 @@ void main(List<String> arguments) async {
   try {
     final ArgResults results = argParser.parse(arguments);
     bool verbose = false;
+    bool wait = results.wasParsed('wait');
 
     // Process the parsed arguments.
     if (results.wasParsed('help')) {
@@ -42,10 +48,16 @@ void main(List<String> arguments) async {
       verbose = true;
     }
 
-    String filename = results['file'];
-    List<String> imageNames = results['images']?.split(",") ?? [];
+    List<String> imageNames = results['images']?.split(listDivider) ?? [];
+    List<String> filenames = results.rest;
 
-    await processFile(filename, imageNames);
+    for (int i = 0; i < filenames.length; i++) {
+      await processFile(filenames[i], imageNames);
+
+      if (i < filenames.length - 1 && wait) {
+        stdin.readLineSync();
+      }
+    }
 
     // Act on the arguments provided.
     if (verbose) {
@@ -64,8 +76,9 @@ Future<void> processFile(String filename, List<String> imageNames) async {
   var content = await File(filename).readAsString();
   content = findAndReplaceOnString(content, notionFindReplaceDefinitions);
   content = replaceImageNames(content, imageNames);
+  final title = extractTitle(content);
   await File("$filename-converted.html").writeAsString(content);
 
-  Clipboard.setContents(content);
-  print("Copied contents to clipboard");
+  print("File \"$title\" converted (Copied to clipboard)");
+  // Clipboard.setContents(content);
 }
