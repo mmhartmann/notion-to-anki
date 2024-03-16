@@ -30,6 +30,13 @@ class FindReplaceDefinition {
 
 final notionFindReplaceDefinitions = <FindReplaceDefinition>[
   FindReplaceDefinition(
+      findPattern:
+          r'<div class="page-header-icon [a-z-_]*"><img class="icon" src="https:\/\/www\.notion\.so\/icons\/[a-z-_]*\.svg"\/><\/div>',
+      replacePattern: ''), // delete header icons
+  FindReplaceDefinition(
+      findPattern: r'<table class="properties">.*</table>',
+      replacePattern: ''), // delete properties table
+  FindReplaceDefinition(
       findPattern: r'(^[^#@\n].+\s\{)',
       replacePattern: r'#notion $1'), // restrict styling to #notion div
   FindReplaceDefinition(
@@ -37,13 +44,13 @@ final notionFindReplaceDefinitions = <FindReplaceDefinition>[
       replacePattern: r'#notion $1'), // restrict styling to #notion div
   FindReplaceDefinition(
       findPattern: r'<body>((.|\n)*)</body>',
-      replacePattern: r'<body><div id="notion">$1</div></body>'), // wrap body in #notion div
+      replacePattern: r'<body><div id="notion">$2</div></body>'), // wrap body in #notion div
   FindReplaceDefinition(
       findPattern: r'\/\* cspell:disable-file \*\/',
       replacePattern:
           r'* {} body { background-color: #fff; overflow-x: scroll;} body * { color: #000; }'), // custom styling
   FindReplaceDefinition(
-      findPattern: r'<details open="">', replacePattern: r'<details>'), // close toggles
+      findPattern: r'<details open="">', replacePattern: r'<details>'), // close toggle
 ];
 
 String findAndReplaceOnString(String content, List<FindReplaceDefinition> definitions) {

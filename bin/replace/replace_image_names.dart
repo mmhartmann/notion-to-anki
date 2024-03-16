@@ -1,7 +1,7 @@
 import 'dart:math';
 
 String replaceImageNames(String content, List<String> imageNames) {
-  final imagePathPattern = RegExp(r'(?<=src=")([^\/]*\/(?=Untitled)[^"]*)', multiLine: true);
+  final imagePathPattern = RegExp(r'(?<=src=")([^\/]*\/*(?=Untitled)[^"]*)', multiLine: true);
 
   final pathMatches = imagePathPattern.allMatches(content);
 
